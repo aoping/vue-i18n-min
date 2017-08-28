@@ -1,0 +1,56 @@
+<html><head><script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- <script src="https://unpkg.com/vue-i18n/dist/vue-i18n.js"></script> -->
+<script src="./vue-i18n.js"></script>
+
+</head><body><div id="app">
+    <p>{{$t('null')}}</p>
+    <p>{{$tc('night',2)}}</p>
+    <p>{{$t('totalOf',{num:3})}}</p>
+    <p>{{nights}}</p>
+</div>
+<script>
+const messages = {
+  en: {
+    null: 'Sorry,null hotels according with your requirement.',
+    totalOf: 'total of {num}',
+    night: 'night | nights'
+  },
+  zh: {
+    null: '抱歉，没有找到符合您要求的酒店，请重新选择筛选条件',
+    totalOf: '共{num}张',
+    night: '晚'
+  }
+}
+
+const i18n = new VueI18n({
+  locale: 'en',
+  messages
+})
+new Vue({
+  i18n,
+  data: {
+    url: ''
+  },
+  computed: {
+    nights: function() {
+        return this.$t('null')
+    }
+  }
+}).$mount('#app')
+
+
+// var m = {
+//   en: {
+//     tos: 'Term of Service',
+//     term1: 'I accept xxx {0}.'
+//   },
+//   ja: {
+//     tos: '利用規約',
+//     term1: '私は xxx の{0}に同意します。'
+//   }
+// }
+// const i = new VueI18n({
+//   locale: 'en',
+//   m
+// })
+</script></body></html>

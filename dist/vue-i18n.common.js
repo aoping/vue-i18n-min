@@ -113,14 +113,7 @@ function looseClone(obj)  {
     return JSON.parse(JSON.stringify(obj))
 }
 
-function remove(arr , item) {
-    if (arr.length) {
-        var index = arr.indexOf(item);
-        if (index > -1) {
-            return arr.splice(index, 1)
-        }
-    }
-}
+
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 function hasOwn(obj , key) {
@@ -175,8 +168,8 @@ var mixin = {
                     }
                 }
                 this._i18n = options.i18n;
-                this._i18nWatcher = this._i18n.watchI18nData();
-                this._i18n.subscribeDataChanging(this);
+                    // this._i18nWatcher = this._i18n.watchI18nData()
+                    // this._i18n.subscribeDataChanging(this)
                 this._subscribing = true;
             } else if (isPlainObject(options.i18n)) {
                 // component local i18n
@@ -202,8 +195,8 @@ var mixin = {
                 }
 
                 this._i18n = new VueI18n(options.i18n);
-                this._i18nWatcher = this._i18n.watchI18nData();
-                this._i18n.subscribeDataChanging(this);
+                    // this._i18nWatcher = this._i18n.watchI18nData()
+                    // this._i18n.subscribeDataChanging(this)
                 this._subscribing = true;
 
                 if (options.i18n.sync === undefined || !!options.i18n.sync) {
@@ -217,12 +210,12 @@ var mixin = {
         } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
             // root i18n
             this._i18n = this.$root.$i18n;
-            this._i18n.subscribeDataChanging(this);
+                // this._i18n.subscribeDataChanging(this)
             this._subscribing = true;
         } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
             // parent i18n
             this._i18n = options.parent.$i18n;
-            this._i18n.subscribeDataChanging(this);
+                // this._i18n.subscribeDataChanging(this)
             this._subscribing = true;
         }
     },
@@ -231,7 +224,7 @@ var mixin = {
         if (!this._i18n) { return }
 
         if (this._subscribing) {
-            this._i18n.unsubscribeDataChanging(this);
+            // this._i18n.unsubscribeDataChanging(this)
             delete this._subscribing;
         }
 
@@ -432,351 +425,29 @@ function compile(tokens , values ) {
 
 /*  */
 
-/**
- *  Path paerser
- *  - Inspired:
- *    Vue.js Path parser
- */
-
-// actions
-var APPEND = 0;
-var PUSH = 1;
-var INC_SUB_PATH_DEPTH = 2;
-var PUSH_SUB_PATH = 3;
-
-// states
-var BEFORE_PATH = 0;
-var IN_PATH = 1;
-var BEFORE_IDENT = 2;
-var IN_IDENT = 3;
-var IN_SUB_PATH = 4;
-var IN_SINGLE_QUOTE = 5;
-var IN_DOUBLE_QUOTE = 6;
-var AFTER_PATH = 7;
-var ERROR = 8;
-
-var pathStateMachine = [];
-
-pathStateMachine[BEFORE_PATH] = {
-  'ws': [BEFORE_PATH],
-  'ident': [IN_IDENT, APPEND],
-  '[': [IN_SUB_PATH],
-  'eof': [AFTER_PATH]
-};
-
-pathStateMachine[IN_PATH] = {
-  'ws': [IN_PATH],
-  '.': [BEFORE_IDENT],
-  '[': [IN_SUB_PATH],
-  'eof': [AFTER_PATH]
-};
-
-pathStateMachine[BEFORE_IDENT] = {
-  'ws': [BEFORE_IDENT],
-  'ident': [IN_IDENT, APPEND],
-  '0': [IN_IDENT, APPEND],
-  'number': [IN_IDENT, APPEND]
-};
-
-pathStateMachine[IN_IDENT] = {
-  'ident': [IN_IDENT, APPEND],
-  '0': [IN_IDENT, APPEND],
-  'number': [IN_IDENT, APPEND],
-  'ws': [IN_PATH, PUSH],
-  '.': [BEFORE_IDENT, PUSH],
-  '[': [IN_SUB_PATH, PUSH],
-  'eof': [AFTER_PATH, PUSH]
-};
-
-pathStateMachine[IN_SUB_PATH] = {
-  "'": [IN_SINGLE_QUOTE, APPEND],
-  '"': [IN_DOUBLE_QUOTE, APPEND],
-  '[': [IN_SUB_PATH, INC_SUB_PATH_DEPTH],
-  ']': [IN_PATH, PUSH_SUB_PATH],
-  'eof': ERROR,
-  'else': [IN_SUB_PATH, APPEND]
-};
-
-pathStateMachine[IN_SINGLE_QUOTE] = {
-  "'": [IN_SUB_PATH, APPEND],
-  'eof': ERROR,
-  'else': [IN_SINGLE_QUOTE, APPEND]
-};
-
-pathStateMachine[IN_DOUBLE_QUOTE] = {
-  '"': [IN_SUB_PATH, APPEND],
-  'eof': ERROR,
-  'else': [IN_DOUBLE_QUOTE, APPEND]
-};
-
-/**
- * Check if an expression is a literal value.
- */
-
-var literalValueRE = /^\s?(true|false|-?[\d.]+|'[^']*'|"[^"]*")\s?$/;
-function isLiteral (exp) {
-  return literalValueRE.test(exp)
-}
-
-/**
- * Strip quotes from a string
- */
-
-function stripQuotes (str) {
-  var a = str.charCodeAt(0);
-  var b = str.charCodeAt(str.length - 1);
-  return a === b && (a === 0x22 || a === 0x27)
-    ? str.slice(1, -1)
-    : str
-}
-
-/**
- * Determine the type of a character in a keypath.
- */
-
-function getPathCharType (ch) {
-  if (ch === undefined || ch === null) { return 'eof' }
-
-  var code = ch.charCodeAt(0);
-
-  switch (code) {
-    case 0x5B: // [
-    case 0x5D: // ]
-    case 0x2E: // .
-    case 0x22: // "
-    case 0x27: // '
-    case 0x30: // 0
-      return ch
-
-    case 0x5F: // _
-    case 0x24: // $
-    case 0x2D: // -
-      return 'ident'
-
-    case 0x20: // Space
-    case 0x09: // Tab
-    case 0x0A: // Newline
-    case 0x0D: // Return
-    case 0xA0:  // No-break space
-    case 0xFEFF:  // Byte Order Mark
-    case 0x2028:  // Line Separator
-    case 0x2029:  // Paragraph Separator
-      return 'ws'
-  }
-
-  // a-z, A-Z
-  if ((code >= 0x61 && code <= 0x7A) || (code >= 0x41 && code <= 0x5A)) {
-    return 'ident'
-  }
-
-  // 1-9
-  if (code >= 0x31 && code <= 0x39) { return 'number' }
-
-  return 'else'
-}
-
-/**
- * Format a subPath, return its plain form if it is
- * a literal string or number. Otherwise prepend the
- * dynamic indicator (*).
- */
-
-function formatSubPath (path) {
-  var trimmed = path.trim();
-  // invalid leading 0
-  if (path.charAt(0) === '0' && isNaN(path)) { return false }
-
-  return isLiteral(trimmed) ? stripQuotes(trimmed) : '*' + trimmed
-}
-
-/**
- * Parse a string path into an array of segments
- */
-
-function parse$1 (path) {
-  var keys = [];
-  var index = -1;
-  var mode = BEFORE_PATH;
-  var subPathDepth = 0;
-  var c;
-  var key;
-  var newChar;
-  var type;
-  var transition;
-  var action;
-  var typeMap;
-  var actions = [];
-
-  actions[PUSH] = function () {
-    if (key !== undefined) {
-      keys.push(key);
-      key = undefined;
-    }
-  };
-
-  actions[APPEND] = function () {
-    if (key === undefined) {
-      key = newChar;
-    } else {
-      key += newChar;
-    }
-  };
-
-  actions[INC_SUB_PATH_DEPTH] = function () {
-    actions[APPEND]();
-    subPathDepth++;
-  };
-
-  actions[PUSH_SUB_PATH] = function () {
-    if (subPathDepth > 0) {
-      subPathDepth--;
-      mode = IN_SUB_PATH;
-      actions[APPEND]();
-    } else {
-      subPathDepth = 0;
-      key = formatSubPath(key);
-      if (key === false) {
-        return false
-      } else {
-        actions[PUSH]();
-      }
-    }
-  };
-
-  function maybeUnescapeQuote () {
-    var nextChar = path[index + 1];
-    if ((mode === IN_SINGLE_QUOTE && nextChar === "'") ||
-      (mode === IN_DOUBLE_QUOTE && nextChar === '"')) {
-      index++;
-      newChar = '\\' + nextChar;
-      actions[APPEND]();
-      return true
-    }
-  }
-
-  while (mode !== null) {
-    index++;
-    c = path[index];
-
-    if (c === '\\' && maybeUnescapeQuote()) {
-      continue
-    }
-
-    type = getPathCharType(c);
-    typeMap = pathStateMachine[mode];
-    transition = typeMap[type] || typeMap['else'] || ERROR;
-
-    if (transition === ERROR) {
-      return // parse error
-    }
-
-    mode = transition[0];
-    action = actions[transition[1]];
-    if (action) {
-      newChar = transition[2];
-      newChar = newChar === undefined
-        ? c
-        : newChar;
-      if (action() === false) {
-        return
-      }
-    }
-
-    if (mode === AFTER_PATH) {
-      return keys
-    }
-  }
-}
-
-
-
-
-
-function empty (target) {
-  /* istanbul ignore else */
-  if (Array.isArray(target)) {
-    return target.length === 0
-  } else {
-    return false
-  }
-}
-
-var I18nPath = function I18nPath () {
-  this._cache = Object.create(null);
-};
-
-/**
- * External parse that check for a cache hit first
- */
-I18nPath.prototype.parsePath = function parsePath (path) {
-  var hit = this._cache[path];
-  if (!hit) {
-    hit = parse$1(path);
-    if (hit) {
-      this._cache[path] = hit;
-    }
-  }
-  return hit || []
-};
-
-/**
- * Get path value from path string
- */
-I18nPath.prototype.getPathValue = function getPathValue (obj, path) {
-  if (!isObject(obj)) { return null }
-
-  var paths = this.parsePath(path);
-  if (empty(paths)) {
-    return null
-  } else {
-    var length = paths.length;
-    var ret = null;
-    var last = obj;
-    var i = 0;
-    while (i < length) {
-      var value = last[paths[i]];
-      if (value === undefined) {
-        last = null;
-        break
-      }
-      last = value;
-      i++;
-    }
-
-    ret = last;
-    return ret
-  }
-};
-
-/*  */
-
 var VueI18n = function VueI18n(options) {
-        if ( options === void 0 ) options = {};
+    if ( options === void 0 ) options = {};
 
-        var locale = options.locale || 'en-US';
-        var messages = options.messages || {};
+    var locale = options.locale || 'en-US';
+    var messages = options.messages || {};
 
-        this._vm = null;
-        this._formatter = options.formatter || new BaseFormatter();
-        this._missing = options.missing || null;
-        this._root = options.root || null;
-        this._sync = options.sync === undefined ? true : !!options.sync;
-        this._fallbackRoot = options.fallbackRoot === undefined ?
-            true :
-            !!options.fallbackRoot;
-        this._silentTranslationWarn = options.silentTranslationWarn === undefined ?
-            false :
-            !!options.silentTranslationWarn;
-        this._dateTimeFormatters = {};
-        this._numberFormatters = {};
-        this._path = new I18nPath();
-        this._dataListeners = [];
+    this._vm = null;
+    this._formatter = options.formatter || new BaseFormatter();
+    this._missing = options.missing || null;
+    this._root = options.root || null;
+    this._sync = options.sync === undefined ? true : !!options.sync;
 
-        this._initVM({
-            locale: locale,
-            messages: messages
-        });
-    };
+    this._silentTranslationWarn = options.silentTranslationWarn === undefined ?
+        false :
+        !!options.silentTranslationWarn;
+    this._dateTimeFormatters = {};
+    this._numberFormatters = {};
+
+    this._initVM({
+        locale: locale,
+        messages: messages
+    });
+};
 
 var prototypeAccessors = { vm: {},messages: {},locale: {},missing: {},formatter: {},silentTranslationWarn: {} };
 
@@ -785,36 +456,6 @@ VueI18n.prototype._initVM = function _initVM (data) {
     Vue.config.silent = true;
     this._vm = new Vue({ data: data });
     Vue.config.silent = silent;
-};
-
-VueI18n.prototype.subscribeDataChanging = function subscribeDataChanging (vm) {
-    this._dataListeners.push(vm);
-};
-
-VueI18n.prototype.unsubscribeDataChanging = function unsubscribeDataChanging (vm) {
-    remove(this._dataListeners, vm);
-};
-
-VueI18n.prototype.watchI18nData = function watchI18nData () {
-    var self = this;
-    return this._vm.$watch('$data', function () {
-        var i = self._dataListeners.length;
-        while (i--) {
-            Vue.nextTick(function () {
-                self._dataListeners[i] && self._dataListeners[i].$forceUpdate();
-            });
-        }
-    }, { deep: true })
-};
-
-VueI18n.prototype.watchLocale = function watchLocale () {
-    /* istanbul ignore if */
-    if (!this._sync || !this._root) { return null }
-    var target = this._vm;
-    return this._root.vm.$watch('locale', function (val) {
-        target.$set(target, 'locale', val);
-        target.$forceUpdate();
-    }, { immediate: true })
 };
 
 prototypeAccessors.vm.get = function () { return this._vm };
@@ -847,7 +488,10 @@ VueI18n.prototype._interpolate = function _interpolate (
 ) {
     if (!message) { return null }
 
-    var pathRet = this._path.getPathValue(message, key);
+    var pathRet = message[key];
+    console.info(message);
+    console.info(key);
+    console.info(pathRet);
     if (Array.isArray(pathRet)) { return pathRet }
 
     var ret;
@@ -928,47 +572,6 @@ VueI18n.prototype.t = function t (key) {
         var ref;
 };
 
-VueI18n.prototype._i = function _i (key, locale, messages, host) {
-        var values = [], len = arguments.length - 4;
-        while ( len-- > 0 ) values[ len ] = arguments[ len + 4 ];
-
-    var ret =
-        this._translate(messages, locale, key, host, 'raw', values);
-    if (this._isFallbackRoot(ret)) {
-        if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-            console.warn(("Fall back to interpolate the keypath '" + key + "' with root locale."));
-        }
-        if (!this._root) { throw Error('unexpected error') }
-        return (ref = this._root).i.apply(ref, [ key ].concat( values ))
-    } else {
-        return this._warnDefault(locale, key, ret, host)
-    }
-        var ref;
-};
-
-VueI18n.prototype.i = function i (key) {
-        var values = [], len = arguments.length - 1;
-        while ( len-- > 0 ) values[ len ] = arguments[ len + 1 ];
-
-    /* istanbul ignore if */
-    if (!key) { return '' }
-
-    var locale = this.locale;
-    var index = 0;
-    if (typeof values[0] === 'string') {
-        locale = values[0];
-        index = 1;
-    }
-
-    var params = [];
-    for (var i = index; i < values.length; i++) {
-        params.push(values[i]);
-    }
-
-    return (ref = this)._i.apply(ref, [ key, locale, this._getMessages(), null ].concat( params ))
-        var ref;
-};
-
 VueI18n.prototype._tc = function _tc (
     key,
     _locale,
@@ -998,7 +601,6 @@ VueI18n.prototype.tc = function tc (key, choice) {
 Object.defineProperties( VueI18n.prototype, prototypeAccessors );
 
 VueI18n.install = install;
-VueI18n.version = '7.1.1';
 
 /* istanbul ignore if */
 if (typeof window !== 'undefined' && window.Vue) {

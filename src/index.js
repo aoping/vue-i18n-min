@@ -10,54 +10,43 @@ import {
     remove
 } from './util'
 import BaseFormatter from './format'
-import I18nPath from './path'
 
-import type { PathValue } from './path'
 
 export default class VueI18n {
     static install: () => void
-    static version: string
-    static availabilities: IntlAvailability
 
     _vm: any
     _formatter: Formatter
     _root: ? I18n
     _sync: boolean
-    _fallbackRoot: boolean
     _missing: ? MissingHandler
     _watcher: any
     _i18nWatcher: Function
     _silentTranslationWarn: boolean
     _dateTimeFormatters: Object
     _numberFormatters: Object
-    _path: I18nPath
-    _dataListeners: Array < any >
 
-        constructor(options: I18nOptions = {}) {
-            const locale: Locale = options.locale || 'en-US'
-            const messages: LocaleMessages = options.messages || {}
+    constructor(options: I18nOptions = {}) {
+        const locale: Locale = options.locale || 'en-US'
+        const messages: LocaleMessages = options.messages || {}
 
-            this._vm = null
-            this._formatter = options.formatter || new BaseFormatter()
-            this._missing = options.missing || null
-            this._root = options.root || null
-            this._sync = options.sync === undefined ? true : !!options.sync
-            this._fallbackRoot = options.fallbackRoot === undefined ?
-                true :
-                !!options.fallbackRoot
-            this._silentTranslationWarn = options.silentTranslationWarn === undefined ?
-                false :
-                !!options.silentTranslationWarn
-            this._dateTimeFormatters = {}
-            this._numberFormatters = {}
-            this._path = new I18nPath()
-            this._dataListeners = []
+        this._vm = null
+        this._formatter = options.formatter || new BaseFormatter()
+        this._missing = options.missing || null
+        this._root = options.root || null
+        this._sync = options.sync === undefined ? true : !!options.sync
 
-            this._initVM({
-                locale,
-                messages
-            })
-        }
+        this._silentTranslationWarn = options.silentTranslationWarn === undefined ?
+            false :
+            !!options.silentTranslationWarn
+        this._dateTimeFormatters = {}
+        this._numberFormatters = {}
+
+        this._initVM({
+            locale,
+            messages
+        })
+    }
 
     _initVM(data: {
         locale: Locale,
@@ -67,36 +56,6 @@ export default class VueI18n {
         Vue.config.silent = true
         this._vm = new Vue({ data })
         Vue.config.silent = silent
-    }
-
-    subscribeDataChanging(vm: any): void {
-        this._dataListeners.push(vm)
-    }
-
-    unsubscribeDataChanging(vm: any): void {
-        remove(this._dataListeners, vm)
-    }
-
-    watchI18nData(): Function {
-        const self = this
-        return this._vm.$watch('$data', () => {
-            let i = self._dataListeners.length
-            while (i--) {
-                Vue.nextTick(() => {
-                    self._dataListeners[i] && self._dataListeners[i].$forceUpdate()
-                })
-            }
-        }, { deep: true })
-    }
-
-    watchLocale(): ? Function {
-        /* istanbul ignore if */
-        if (!this._sync || !this._root) { return null }
-        const target: any = this._vm
-        return this._root.vm.$watch('locale', (val) => {
-            target.$set(target, 'locale', val)
-            target.$forceUpdate()
-        }, { immediate: true })
     }
 
     get vm(): any { return this._vm }
@@ -129,7 +88,10 @@ export default class VueI18n {
     ): any {
         if (!message) { return null }
 
-        const pathRet: PathValue = this._path.getPathValue(message, key)
+        const pathRet: string = message[key]
+        console.info(message)
+        console.info(key)
+        console.info(pathRet)
         if (Array.isArray(pathRet)) { return pathRet }
 
         let ret: mixed
@@ -203,39 +165,6 @@ export default class VueI18n {
         return this._t(key, this.locale, this._getMessages(), null, ...values)
     }
 
-    _i(key: Path, locale: Locale, messages: LocaleMessages, host: any, ...values: any): any {
-        const ret: any =
-            this._translate(messages, locale, key, host, 'raw', values)
-        if (this._isFallbackRoot(ret)) {
-            if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                console.warn(`Fall back to interpolate the keypath '${key}' with root locale.`)
-            }
-            if (!this._root) { throw Error('unexpected error') }
-            return this._root.i(key, ...values)
-        } else {
-            return this._warnDefault(locale, key, ret, host)
-        }
-    }
-
-    i(key: Path, ...values: any): TranslateResult {
-        /* istanbul ignore if */
-        if (!key) { return '' }
-
-        let locale: Locale = this.locale
-        let index: number = 0
-        if (typeof values[0] === 'string') {
-            locale = values[0]
-            index = 1
-        }
-
-        const params: Array < any > = []
-        for (let i = index; i < values.length; i++) {
-            params.push(values[i])
-        }
-
-        return this._i(key, locale, this._getMessages(), null, ...params)
-    }
-
     _tc(
         key: Path,
         _locale: Locale,
@@ -258,7 +187,6 @@ export default class VueI18n {
 }
 
 VueI18n.install = install
-VueI18n.version = '__VERSION__'
 
 /* istanbul ignore if */
 if (typeof window !== 'undefined' && window.Vue) {

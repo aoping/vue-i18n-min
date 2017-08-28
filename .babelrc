@@ -1,0 +1,13 @@
+{
+  "presets": ["es2015", "flow-vue"],
+  "plugins": ["babel-plugin-espower"],
+  "env": {
+    "test": {
+      "plugins": ["istanbul"],
+      "presets": ["power-assert"]
+    }
+  },
+  "ignore": [
+    "dist/*.js"
+  ]
+}

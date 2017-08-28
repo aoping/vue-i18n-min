@@ -433,15 +433,9 @@ var VueI18n = function VueI18n(options) {
 
     this._vm = null;
     this._formatter = options.formatter || new BaseFormatter();
-    this._missing = options.missing || null;
     this._root = options.root || null;
     this._sync = options.sync === undefined ? true : !!options.sync;
 
-    this._silentTranslationWarn = options.silentTranslationWarn === undefined ?
-        false :
-        !!options.silentTranslationWarn;
-    this._dateTimeFormatters = {};
-    this._numberFormatters = {};
 
     this._initVM({
         locale: locale,
@@ -449,7 +443,7 @@ var VueI18n = function VueI18n(options) {
     });
 };
 
-var prototypeAccessors = { vm: {},messages: {},locale: {},missing: {},formatter: {},silentTranslationWarn: {} };
+var prototypeAccessors = { vm: {},messages: {},locale: {},formatter: {} };
 
 VueI18n.prototype._initVM = function _initVM (data) {
     var silent = Vue.config.silent;
@@ -467,14 +461,11 @@ prototypeAccessors.locale.set = function (locale) {
     this._vm.$set(this._vm, 'locale', locale);
 };
 
-prototypeAccessors.missing.get = function () { return this._missing };
-prototypeAccessors.missing.set = function (handler) { this._missing = handler; };
 
 prototypeAccessors.formatter.get = function () { return this._formatter };
 prototypeAccessors.formatter.set = function (formatter) { this._formatter = formatter; };
 
-prototypeAccessors.silentTranslationWarn.get = function () { return this._silentTranslationWarn };
-prototypeAccessors.silentTranslationWarn.set = function (silent) { this._silentTranslationWarn = silent; };
+
 
 VueI18n.prototype._getMessages = function _getMessages () { return this._vm.messages };
 
@@ -489,33 +480,16 @@ VueI18n.prototype._interpolate = function _interpolate (
     if (!message) { return null }
 
     var pathRet = message[key];
-    console.info(message);
-    console.info(key);
-    console.info(pathRet);
     if (Array.isArray(pathRet)) { return pathRet }
 
     var ret;
     if (isNull(pathRet)) {
-        /* istanbul ignore else */
-        if (isPlainObject(message)) {
-            ret = message[key];
-            if (typeof ret !== 'string') {
-                if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                    console.warn(("Value of key '" + key + "' is not a string!"));
-                }
-                return null
-            }
-        } else {
-            return null
-        }
+        return null
     } else {
         /* istanbul ignore else */
         if (typeof pathRet === 'string') {
             ret = pathRet;
         } else {
-            if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                console.warn(("Value of key '" + key + "' is not a string!"));
-            }
             return null
         }
     }

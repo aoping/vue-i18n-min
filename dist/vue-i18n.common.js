@@ -7,133 +7,6 @@
 
 /*  */
 
-/**
- * utilites
- */
-
-function warn (msg, err) {
-  if (typeof console !== 'undefined') {
-    console.warn('[vue-i18n] ' + msg);
-    /* istanbul ignore if */
-    if (err) {
-      console.warn(err.stack);
-    }
-  }
-}
-
-function isObject (obj) {
-  return obj !== null && typeof obj === 'object'
-}
-
-var toString = Object.prototype.toString;
-var OBJECT_STRING = '[object Object]';
-function isPlainObject (obj) {
-  return toString.call(obj) === OBJECT_STRING
-}
-
-function isNull (val) {
-  return val === null || val === undefined
-}
-
-function parseArgs () {
-  var args = [], len = arguments.length;
-  while ( len-- ) args[ len ] = arguments[ len ];
-
-  var locale = null;
-  var params = null;
-  if (args.length === 1) {
-    if (isObject(args[0]) || Array.isArray(args[0])) {
-      params = args[0];
-    } else if (typeof args[0] === 'string') {
-      locale = args[0];
-    }
-  } else if (args.length === 2) {
-    if (typeof args[0] === 'string') {
-      locale = args[0];
-    }
-    /* istanbul ignore if */
-    if (isObject(args[1]) || Array.isArray(args[1])) {
-      params = args[1];
-    }
-  }
-
-  return { locale: locale, params: params }
-}
-
-function getOldChoiceIndexFixed (choice) {
-  return choice
-    ? choice > 1
-      ? 1
-      : 0
-    : 1
-}
-
-function getChoiceIndex (choice, choicesLength) {
-  choice = Math.abs(choice);
-
-  if (choicesLength === 2) { return getOldChoiceIndexFixed(choice) }
-
-  return choice ? Math.min(choice, 2) : 0
-}
-
-function fetchChoice (message, choice) {
-  /* istanbul ignore if */
-  if (!message && typeof message !== 'string') { return null }
-  var choices = message.split('|');
-
-  choice = getChoiceIndex(choice, choices.length);
-  if (!choices[choice]) { return message }
-  return choices[choice].trim()
-}
-
-function looseClone (obj) {
-  return JSON.parse(JSON.stringify(obj))
-}
-
-function remove (arr, item) {
-  if (arr.length) {
-    var index = arr.indexOf(item);
-    if (index > -1) {
-      return arr.splice(index, 1)
-    }
-  }
-}
-
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-function hasOwn (obj, key) {
-  return hasOwnProperty.call(obj, key)
-}
-
-function merge (target) {
-  var arguments$1 = arguments;
-
-  var output = Object(target);
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments$1[i];
-    if (source !== undefined && source !== null) {
-      var key = (void 0);
-      for (key in source) {
-        if (hasOwn(source, key)) {
-          if (isObject(source[key])) {
-            output[key] = merge(output[key], source[key]);
-          } else {
-            output[key] = source[key];
-          }
-        }
-      }
-    }
-  }
-  return output
-}
-
-var canUseDateTimeFormat =
-  typeof Intl !== 'undefined' && typeof Intl.DateTimeFormat !== 'undefined';
-
-var canUseNumberFormat =
-  typeof Intl !== 'undefined' && typeof Intl.NumberFormat !== 'undefined';
-
-/*  */
-
 function extend(Vue) {
     Vue.prototype.$t = function(key) {
         var values = [], len = arguments.length - 1;
@@ -167,283 +40,394 @@ function extend(Vue) {
 
 /*  */
 
+/**
+ * utilites
+ */
+
+function isObject(obj) {
+    return obj !== null && typeof obj === 'object'
+}
+
+var toString = Object.prototype.toString;
+var OBJECT_STRING = '[object Object]';
+function isPlainObject(obj) {
+    return toString.call(obj) === OBJECT_STRING
+}
+
+function isNull(val) {
+    return val === null || val === undefined
+}
+
+function parseArgs() {
+    var args = [], len = arguments.length;
+    while ( len-- ) args[ len ] = arguments[ len ];
+
+    var locale = null;
+    var params = null;
+    if (args.length === 1) {
+        if (isObject(args[0]) || Array.isArray(args[0])) {
+            params = args[0];
+        } else if (typeof args[0] === 'string') {
+            locale = args[0];
+        }
+    } else if (args.length === 2) {
+        if (typeof args[0] === 'string') {
+            locale = args[0];
+        }
+        /* istanbul ignore if */
+        if (isObject(args[1]) || Array.isArray(args[1])) {
+            params = args[1];
+        }
+    }
+
+    return { locale: locale, params: params }
+}
+
+function getOldChoiceIndexFixed(choice) {
+    return choice ?
+        choice > 1 ?
+        1 :
+        0 :
+        1
+}
+
+function getChoiceIndex(choice, choicesLength) {
+    choice = Math.abs(choice);
+
+    if (choicesLength === 2) { return getOldChoiceIndexFixed(choice) }
+
+    return choice ? Math.min(choice, 2) : 0
+}
+
+function fetchChoice(message, choice) {
+    /* istanbul ignore if */
+    if (!message && typeof message !== 'string') { return null }
+    var choices = message.split('|');
+
+    choice = getChoiceIndex(choice, choices.length);
+    if (!choices[choice]) { return message }
+    return choices[choice].trim()
+}
+
+function looseClone(obj)  {
+    return JSON.parse(JSON.stringify(obj))
+}
+
+function remove(arr , item) {
+    if (arr.length) {
+        var index = arr.indexOf(item);
+        if (index > -1) {
+            return arr.splice(index, 1)
+        }
+    }
+}
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+function hasOwn(obj , key) {
+    return hasOwnProperty.call(obj, key)
+}
+
+function merge(target) {
+    var arguments$1 = arguments;
+
+    var output = Object(target);
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments$1[i];
+        if (source !== undefined && source !== null) {
+            var key = (void 0);
+            for (key in source) {
+                if (hasOwn(source, key)) {
+                    if (isObject(source[key])) {
+                        output[key] = merge(output[key], source[key]);
+                    } else {
+                        output[key] = source[key];
+                    }
+                }
+            }
+        }
+    }
+    return output
+}
+
+/*  */
+
 var mixin = {
-  beforeCreate: function beforeCreate () {
-    var options = this.$options;
-    options.i18n = options.i18n || (options.__i18n ? {} : null);
+    beforeCreate: function beforeCreate() {
+        var options = this.$options;
+        options.i18n = options.i18n || (options.__i18n ? {} : null);
 
-    if (options.i18n) {
-      if (options.i18n instanceof VueI18n) {
-        // init locale messages via custom blocks
-        if (options.__i18n) {
-          try {
-            var localeMessages = {};
-            options.__i18n.forEach(function (resource) {
-              localeMessages = merge(localeMessages, JSON.parse(resource));
-            });
-            Object.keys(localeMessages).forEach(function (locale) {
-              options.i18n.mergeLocaleMessage(locale, localeMessages[locale]);
-            });
-          } catch (e) {
-            if (process.env.NODE_ENV !== 'production') {
-              warn("Cannot parse locale messages via custom blocks.", e);
+        if (options.i18n) {
+            if (options.i18n instanceof VueI18n) {
+                // init locale messages via custom blocks
+                if (options.__i18n) {
+                    try {
+                        var localeMessages = {};
+                        options.__i18n.forEach(function (resource) {
+                            localeMessages = merge(localeMessages, JSON.parse(resource));
+                        });
+                        Object.keys(localeMessages).forEach(function (locale) {
+                            options.i18n.mergeLocaleMessage(locale, localeMessages[locale]);
+                        });
+                    } catch (e) {
+                        if (process.env.NODE_ENV !== 'production') {
+                            console.warn("Cannot parse locale messages via custom blocks.", e);
+                        }
+                    }
+                }
+                this._i18n = options.i18n;
+                this._i18nWatcher = this._i18n.watchI18nData();
+                this._i18n.subscribeDataChanging(this);
+                this._subscribing = true;
+            } else if (isPlainObject(options.i18n)) {
+                // component local i18n
+                if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
+                    options.i18n.root = this.$root.$i18n;
+                    options.i18n.fallbackLocale = this.$root.$i18n.fallbackLocale;
+                    options.i18n.silentTranslationWarn = this.$root.$i18n.silentTranslationWarn;
+                }
+
+                // init locale messages via custom blocks
+                if (options.__i18n) {
+                    try {
+                        var localeMessages$1 = {};
+                        options.__i18n.forEach(function (resource) {
+                            localeMessages$1 = merge(localeMessages$1, JSON.parse(resource));
+                        });
+                        options.i18n.messages = localeMessages$1;
+                    } catch (e) {
+                        if (process.env.NODE_ENV !== 'production') {
+                            console.warn("Cannot parse locale messages via custom blocks.", e);
+                        }
+                    }
+                }
+
+                this._i18n = new VueI18n(options.i18n);
+                this._i18nWatcher = this._i18n.watchI18nData();
+                this._i18n.subscribeDataChanging(this);
+                this._subscribing = true;
+
+                if (options.i18n.sync === undefined || !!options.i18n.sync) {
+                    this._localeWatcher = this.$i18n.watchLocale();
+                }
+            } else {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.warn("Cannot be interpreted 'i18n' option.");
+                }
             }
-          }
+        } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
+            // root i18n
+            this._i18n = this.$root.$i18n;
+            this._i18n.subscribeDataChanging(this);
+            this._subscribing = true;
+        } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
+            // parent i18n
+            this._i18n = options.parent.$i18n;
+            this._i18n.subscribeDataChanging(this);
+            this._subscribing = true;
         }
-        this._i18n = options.i18n;
-        this._i18nWatcher = this._i18n.watchI18nData();
-        this._i18n.subscribeDataChanging(this);
-        this._subscribing = true;
-      } else if (isPlainObject(options.i18n)) {
-        // component local i18n
-        if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
-          options.i18n.root = this.$root.$i18n;
-          options.i18n.fallbackLocale = this.$root.$i18n.fallbackLocale;
-          options.i18n.silentTranslationWarn = this.$root.$i18n.silentTranslationWarn;
+    },
+
+    beforeDestroy: function beforeDestroy() {
+        if (!this._i18n) { return }
+
+        if (this._subscribing) {
+            this._i18n.unsubscribeDataChanging(this);
+            delete this._subscribing;
         }
 
-        // init locale messages via custom blocks
-        if (options.__i18n) {
-          try {
-            var localeMessages$1 = {};
-            options.__i18n.forEach(function (resource) {
-              localeMessages$1 = merge(localeMessages$1, JSON.parse(resource));
-            });
-            options.i18n.messages = localeMessages$1;
-          } catch (e) {
-            if (process.env.NODE_ENV !== 'production') {
-              warn("Cannot parse locale messages via custom blocks.", e);
-            }
-          }
+        if (this._i18nWatcher) {
+            this._i18nWatcher();
+            delete this._i18nWatcher;
         }
 
-        this._i18n = new VueI18n(options.i18n);
-        this._i18nWatcher = this._i18n.watchI18nData();
-        this._i18n.subscribeDataChanging(this);
-        this._subscribing = true;
+        if (this._localeWatcher) {
+            this._localeWatcher();
+            delete this._localeWatcher;
+        }
 
-        if (options.i18n.sync === undefined || !!options.i18n.sync) {
-          this._localeWatcher = this.$i18n.watchLocale();
-        }
-      } else {
-        if (process.env.NODE_ENV !== 'production') {
-          warn("Cannot be interpreted 'i18n' option.");
-        }
-      }
-    } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
-      // root i18n
-      this._i18n = this.$root.$i18n;
-      this._i18n.subscribeDataChanging(this);
-      this._subscribing = true;
-    } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
-      // parent i18n
-      this._i18n = options.parent.$i18n;
-      this._i18n.subscribeDataChanging(this);
-      this._subscribing = true;
+        this._i18n = null;
     }
-  },
-
-  beforeDestroy: function beforeDestroy () {
-    if (!this._i18n) { return }
-
-    if (this._subscribing) {
-      this._i18n.unsubscribeDataChanging(this);
-      delete this._subscribing;
-    }
-
-    if (this._i18nWatcher) {
-      this._i18nWatcher();
-      delete this._i18nWatcher;
-    }
-
-    if (this._localeWatcher) {
-      this._localeWatcher();
-      delete this._localeWatcher;
-    }
-
-    this._i18n = null;
-  }
 };
 
 /*  */
 
 var component = {
-  name: 'i18n',
-  functional: true,
-  props: {
-    tag: {
-      type: String,
-      default: 'span'
+    name: 'i18n',
+    functional: true,
+    props: {
+        tag: {
+            type: String,
+            default: 'span'
+        },
+        path: {
+            type: String,
+            required: true
+        },
+        locale: {
+            type: String
+        }
     },
-    path: {
-      type: String,
-      required: true
-    },
-    locale: {
-      type: String
+    render: function render(h, ref) {
+        var props = ref.props;
+        var data = ref.data;
+        var children = ref.children;
+        var parent = ref.parent;
+
+        var i18n = parent.$i18n;
+        if (!i18n) {
+            if (process.env.NODE_ENV !== 'production') {
+                console.warn('Cannot find VueI18n instance!');
+            }
+            return children
+        }
+
+        var path = props.path;
+        var locale = props.locale;
+
+        var params = [];
+        locale && params.push(locale);
+        children.forEach(function (child) { return params.push(child); });
+
+        return h(props.tag, data, i18n.i.apply(i18n, [ path ].concat( params )))
     }
-  },
-  render: function render (h, ref) {
-    var props = ref.props;
-    var data = ref.data;
-    var children = ref.children;
-    var parent = ref.parent;
-
-    var i18n = parent.$i18n;
-    if (!i18n) {
-      if (process.env.NODE_ENV !== 'production') {
-        warn('Cannot find VueI18n instance!');
-      }
-      return children
-    }
-
-    var path = props.path;
-    var locale = props.locale;
-
-    var params = [];
-    locale && params.push(locale);
-    children.forEach(function (child) { return params.push(child); });
-
-    return h(props.tag, data, i18n.i.apply(i18n, [ path ].concat( params )))
-  }
 };
 
 var Vue;
 
-function install (_Vue) {
-  Vue = _Vue;
+function install(_Vue) {
+    Vue = _Vue;
 
-  var version = (Vue.version && Number(Vue.version.split('.')[0])) || -1;
-  /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production' && install.installed) {
-    warn('already installed.');
-    return
-  }
-  install.installed = true;
+    var version = (Vue.version && Number(Vue.version.split('.')[0])) || -1;
+        /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production' && install.installed) {
+        console.warn('already installed.');
+        return
+    }
+    install.installed = true;
 
-  /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production' && version < 2) {
-    warn(("vue-i18n (" + (install.version) + ") need to use Vue 2.0 or later (Vue: " + (Vue.version) + ")."));
-    return
-  }
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production' && version < 2) {
+        console.warn(("vue-i18n (" + (install.version) + ") need to use Vue 2.0 or later (Vue: " + (Vue.version) + ")."));
+        return
+    }
 
-  Object.defineProperty(Vue.prototype, '$i18n', {
-    get: function get () { return this._i18n }
-  });
+    Object.defineProperty(Vue.prototype, '$i18n', {
+        get: function get() { return this._i18n }
+    });
 
-  extend(Vue);
-  Vue.mixin(mixin);
-  Vue.component(component.name, component);
+    extend(Vue);
+    Vue.mixin(mixin);
+    Vue.component(component.name, component);
 
-  // use object-based merge strategy
-  var strats = Vue.config.optionMergeStrategies;
-  strats.i18n = strats.methods;
+    // use object-based merge strategy
+    var strats = Vue.config.optionMergeStrategies;
+    strats.i18n = strats.methods;
 }
 
 /*  */
 
-var BaseFormatter = function BaseFormatter () {
-  this._caches = Object.create(null);
+var BaseFormatter = function BaseFormatter() {
+    this._caches = Object.create(null);
 };
 
 BaseFormatter.prototype.interpolate = function interpolate (message, values) {
-  var tokens = this._caches[message];
-  if (!tokens) {
-    tokens = parse(message);
-    this._caches[message] = tokens;
-  }
-  return compile(tokens, values)
+    var tokens = this._caches[message];
+    if (!tokens) {
+        tokens = parse(message);
+        this._caches[message] = tokens;
+    }
+    return compile(tokens, values)
 };
 
 var RE_TOKEN_LIST_VALUE = /^(\d)+/;
 var RE_TOKEN_NAMED_VALUE = /^(\w)+/;
 
-function parse (format) {
-  var tokens = [];
-  var position = 0;
+function parse(format) {
+    var tokens = [];
+    var position = 0;
 
-  var text = '';
-  while (position < format.length) {
-    var char = format[position++];
-    if (char === '{') {
-      if (text) {
-        tokens.push({ type: 'text', value: text });
-      }
+    var text = '';
+    while (position < format.length) {
+        var char = format[position++];
+        if (char === '{') {
+            if (text) {
+                tokens.push({ type: 'text', value: text });
+            }
 
-      text = '';
-      var sub = '';
-      char = format[position++];
-      while (char !== '}') {
-        sub += char;
-        char = format[position++];
-      }
+            text = '';
+            var sub = '';
+            char = format[position++];
+            while (char !== '}') {
+                sub += char;
+                char = format[position++];
+            }
 
-      var type = RE_TOKEN_LIST_VALUE.test(sub)
-        ? 'list'
-        : RE_TOKEN_NAMED_VALUE.test(sub)
-          ? 'named'
-          : 'unknown';
-      tokens.push({ value: sub, type: type });
-    } else if (char === '%') {
-      // when found rails i18n syntax, skip text capture
-      if (format[(position)] !== '{') {
-        text += char;
-      }
-    } else {
-      text += char;
+            var type = RE_TOKEN_LIST_VALUE.test(sub) ?
+                'list' :
+                RE_TOKEN_NAMED_VALUE.test(sub) ?
+                'named' :
+                'unknown';
+            tokens.push({ value: sub, type: type });
+        } else if (char === '%') {
+            // when found rails i18n syntax, skip text capture
+            if (format[(position)] !== '{') {
+                text += char;
+            }
+        } else {
+            text += char;
+        }
     }
-  }
 
-  text && tokens.push({ type: 'text', value: text });
+    text && tokens.push({ type: 'text', value: text });
 
-  return tokens
+    return tokens
 }
 
-function compile (tokens, values) {
-  var compiled = [];
-  var index = 0;
+function compile(tokens , values ) {
+    var compiled = [];
+    var index = 0;
 
-  var mode = Array.isArray(values)
-    ? 'list'
-    : isObject(values)
-      ? 'named'
-      : 'unknown';
-  if (mode === 'unknown') { return compiled }
+    var mode = Array.isArray(values) ?
+        'list' :
+        isObject(values) ?
+        'named' :
+        'unknown';
+    if (mode === 'unknown') { return compiled }
 
-  while (index < tokens.length) {
-    var token = tokens[index];
-    switch (token.type) {
-      case 'text':
-        compiled.push(token.value);
-        break
-      case 'list':
-        if (mode === 'list') {
-          compiled.push(values[parseInt(token.value, 10)]);
-        } else {
-          if (process.env.NODE_ENV !== 'production') {
-            warn(("Type of token '" + (token.type) + "' and format of value '" + mode + "' don't match!"));
-          }
+    while (index < tokens.length) {
+        var token = tokens[index];
+        switch (token.type) {
+            case 'text':
+                compiled.push(token.value);
+                break
+            case 'list':
+                if (mode === 'list') {
+                    compiled.push(values[parseInt(token.value, 10)]);
+                } else {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.warn(("Type of token '" + (token.type) + "' and format of value '" + mode + "' don't match!"));
+                    }
+                }
+                break
+            case 'named':
+                if (mode === 'named') {
+                    compiled.push((values)[token.value]);
+                } else {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.warn(("Type of token '" + (token.type) + "' and format of value '" + mode + "' don't match!"));
+                    }
+                }
+                break
+            case 'unknown':
+                if (process.env.NODE_ENV !== 'production') {
+                    warn("Detect 'unknown' type of token!");
+                }
+                break
         }
-        break
-      case 'named':
-        if (mode === 'named') {
-          compiled.push((values)[token.value]);
-        } else {
-          if (process.env.NODE_ENV !== 'production') {
-            warn(("Type of token '" + (token.type) + "' and format of value '" + mode + "' don't match!"));
-          }
-        }
-        break
-      case 'unknown':
-        if (process.env.NODE_ENV !== 'production') {
-          warn("Detect 'unknown' type of token!");
-        }
-        break
+        index++;
     }
-    index++;
-  }
 
-  return compiled
+    return compiled
 }
 
 /*  */
@@ -767,7 +751,6 @@ I18nPath.prototype.getPathValue = function getPathValue (obj, path) {
 /*  */
 
 var VueI18n = function VueI18n(options) {
-        var this$1 = this;
         if ( options === void 0 ) options = {};
 
         var locale = options.locale || 'en-US';
@@ -788,11 +771,6 @@ var VueI18n = function VueI18n(options) {
         this._numberFormatters = {};
         this._path = new I18nPath();
         this._dataListeners = [];
-
-        this._exist = function (message, key) {
-            if (!message || !key) { return false }
-            return !isNull(this$1._path.getPathValue(message, key))
-        };
 
         this._initVM({
             locale: locale,
@@ -879,7 +857,7 @@ VueI18n.prototype._interpolate = function _interpolate (
             ret = message[key];
             if (typeof ret !== 'string') {
                 if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                    warn(("Value of key '" + key + "' is not a string!"));
+                    console.warn(("Value of key '" + key + "' is not a string!"));
                 }
                 return null
             }
@@ -892,71 +870,13 @@ VueI18n.prototype._interpolate = function _interpolate (
             ret = pathRet;
         } else {
             if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                warn(("Value of key '" + key + "' is not a string!"));
+                console.warn(("Value of key '" + key + "' is not a string!"));
             }
             return null
         }
     }
 
-    // Check for the existance of links within the translated string
-    if (ret.indexOf('@:') >= 0) {
-        ret = this._link(locale, message, ret, host, interpolateMode, values);
-    }
-
     return !values ? ret : this._render(ret, interpolateMode, values)
-};
-
-VueI18n.prototype._link = function _link (
-    locale,
-    message,
-    str,
-    host,
-    interpolateMode,
-    values
-) {
-        var this$1 = this;
-
-    var ret = str;
-
-    // Match all the links within the local
-    // We are going to replace each of
-    // them with its translation
-    var matches = ret.match(/(@:[\w\-_|.]+)/g);
-    for (var idx in matches) {
-        // ie compatible: filter custom array
-        // prototype method
-        if (!matches.hasOwnProperty(idx)) {
-            continue
-        }
-        var link = matches[idx];
-            // Remove the leading @:
-        var linkPlaceholder = link.substr(2);
-            // Translate the link
-        var translated = this$1._interpolate(
-            locale, message, linkPlaceholder, host,
-            interpolateMode === 'raw' ? 'string' : interpolateMode,
-            interpolateMode === 'raw' ? undefined : values
-        );
-
-        if (this$1._isFallbackRoot(translated)) {
-            if (process.env.NODE_ENV !== 'production' && !this$1._silentTranslationWarn) {
-                warn(("Fall back to translate the link placeholder '" + linkPlaceholder + "' with root locale."));
-            }
-            /* istanbul ignore if */
-            if (!this$1._root) { throw Error('unexpected error') }
-            var root = this$1._root;
-            translated = root._translate(
-                root._getMessages(), root.locale,
-                linkPlaceholder, host, interpolateMode, values
-            );
-        }
-        translated = this$1._warnDefault(locale, linkPlaceholder, translated, host);
-
-        // Replace the link with the translated
-        ret = !translated ? ret : ret.replace(link, translated);
-    }
-
-    return ret
 };
 
 VueI18n.prototype._render = function _render (message, interpolateMode, values) {
@@ -1016,7 +936,7 @@ VueI18n.prototype._i = function _i (key, locale, messages, host) {
         this._translate(messages, locale, key, host, 'raw', values);
     if (this._isFallbackRoot(ret)) {
         if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-            warn(("Fall back to interpolate the keypath '" + key + "' with root locale."));
+            console.warn(("Fall back to interpolate the keypath '" + key + "' with root locale."));
         }
         if (!this._root) { throw Error('unexpected error') }
         return (ref = this._root).i.apply(ref, [ key ].concat( values ))
@@ -1077,10 +997,6 @@ VueI18n.prototype.tc = function tc (key, choice) {
 
 Object.defineProperties( VueI18n.prototype, prototypeAccessors );
 
-VueI18n.availabilities = {
-    dateTimeFormat: canUseDateTimeFormat,
-    numberFormat: canUseNumberFormat
-};
 VueI18n.install = install;
 VueI18n.version = '7.1.1';
 

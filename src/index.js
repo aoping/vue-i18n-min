@@ -2,16 +2,12 @@
 
 import { install, Vue } from './install'
 import {
-    warn,
     isNull,
     parseArgs,
     fetchChoice,
     isPlainObject,
-    isObject,
     looseClone,
-    remove,
-    canUseDateTimeFormat,
-    canUseNumberFormat
+    remove
 } from './util'
 import BaseFormatter from './format'
 import I18nPath from './path'
@@ -29,7 +25,6 @@ export default class VueI18n {
     _sync: boolean
     _fallbackRoot: boolean
     _missing: ? MissingHandler
-    _exist: Function
     _watcher: any
     _i18nWatcher: Function
     _silentTranslationWarn: boolean
@@ -57,11 +52,6 @@ export default class VueI18n {
             this._numberFormatters = {}
             this._path = new I18nPath()
             this._dataListeners = []
-
-            this._exist = (message: Object, key: Path): boolean => {
-                if (!message || !key) { return false }
-                return !isNull(this._path.getPathValue(message, key))
-            }
 
             this._initVM({
                 locale,
@@ -149,7 +139,7 @@ export default class VueI18n {
                 ret = message[key]
                 if (typeof ret !== 'string') {
                     if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                        warn(`Value of key '${key}' is not a string!`)
+                        console.warn(`Value of key '${key}' is not a string!`)
                     }
                     return null
                 }
@@ -162,69 +152,13 @@ export default class VueI18n {
                 ret = pathRet
             } else {
                 if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                    warn(`Value of key '${key}' is not a string!`)
+                    console.warn(`Value of key '${key}' is not a string!`)
                 }
                 return null
             }
         }
 
-        // Check for the existance of links within the translated string
-        if (ret.indexOf('@:') >= 0) {
-            ret = this._link(locale, message, ret, host, interpolateMode, values)
-        }
-
         return !values ? ret : this._render(ret, interpolateMode, values)
-    }
-
-    _link(
-        locale: Locale,
-        message: LocaleMessageObject,
-        str: string,
-        host: any,
-        interpolateMode: string,
-        values: any
-    ): any {
-        let ret: string = str
-
-        // Match all the links within the local
-        // We are going to replace each of
-        // them with its translation
-        const matches: any = ret.match(/(@:[\w\-_|.]+)/g)
-        for (const idx in matches) {
-            // ie compatible: filter custom array
-            // prototype method
-            if (!matches.hasOwnProperty(idx)) {
-                continue
-            }
-            const link: string = matches[idx]
-                // Remove the leading @:
-            const linkPlaceholder: string = link.substr(2)
-                // Translate the link
-            let translated: any = this._interpolate(
-                locale, message, linkPlaceholder, host,
-                interpolateMode === 'raw' ? 'string' : interpolateMode,
-                interpolateMode === 'raw' ? undefined : values
-            )
-
-            if (this._isFallbackRoot(translated)) {
-                if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                    warn(`Fall back to translate the link placeholder '${linkPlaceholder}' with root locale.`)
-                }
-                /* istanbul ignore if */
-                if (!this._root) { throw Error('unexpected error') }
-                const root: any = this._root
-                translated = root._translate(
-                    root._getMessages(), root.locale,
-                    linkPlaceholder, host, interpolateMode, values
-                )
-            }
-            translated = this._warnDefault(locale, linkPlaceholder, translated, host)
-
-            // Replace the link with the translated
-            ret = !translated ? ret : ret.replace(link, translated)
-        }
-
-        return ret
     }
 
     _render(message: string, interpolateMode: string, values: any): any {
@@ -274,7 +208,7 @@ export default class VueI18n {
             this._translate(messages, locale, key, host, 'raw', values)
         if (this._isFallbackRoot(ret)) {
             if (process.env.NODE_ENV !== 'production' && !this._silentTranslationWarn) {
-                warn(`Fall back to interpolate the keypath '${key}' with root locale.`)
+                console.warn(`Fall back to interpolate the keypath '${key}' with root locale.`)
             }
             if (!this._root) { throw Error('unexpected error') }
             return this._root.i(key, ...values)
@@ -323,10 +257,6 @@ export default class VueI18n {
 
 }
 
-VueI18n.availabilities = {
-    dateTimeFormat: canUseDateTimeFormat,
-    numberFormat: canUseNumberFormat
-}
 VueI18n.install = install
 VueI18n.version = '__VERSION__'
 

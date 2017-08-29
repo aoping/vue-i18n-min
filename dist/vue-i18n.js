@@ -17,6 +17,7 @@ function extend(Vue) {
         while ( len-- > 0 ) values[ len ] = arguments[ len + 1 ];
 
         var i18n = this.$i18n;
+        console.log(this);
         return i18n._t.apply(i18n, [ key, i18n.locale, i18n._getMessages(), this ].concat( values ))
     };
 
@@ -39,11 +40,7 @@ function isObject(obj) {
     return obj !== null && typeof obj === 'object'
 }
 
-var toString = Object.prototype.toString;
-var OBJECT_STRING = '[object Object]';
-function isPlainObject(obj) {
-    return toString.call(obj) === OBJECT_STRING
-}
+
 
 function isNull(val) {
     return val === null || val === undefined
@@ -137,145 +134,13 @@ function merge(target) {
 
 var mixin = {
     beforeCreate: function beforeCreate() {
-        var options = this.$options;
-        options.i18n = options.i18n || (options.__i18n ? {} : null);
-        console.log(options.i18n);
-        if (options.i18n) {
-            console.log(1);
-            if (options.i18n instanceof VueI18n) {
-                // init locale messages via custom blocks
-                if (options.__i18n) {
-                    try {
-                        var localeMessages = {};
-                        options.__i18n.forEach(function (resource) {
-                            localeMessages = merge(localeMessages, JSON.parse(resource));
-                        });
-                        Object.keys(localeMessages).forEach(function (locale) {
-                            options.i18n.mergeLocaleMessage(locale, localeMessages[locale]);
-                        });
-                    } catch (e) {
-                        {
-                            console.warn("Cannot parse locale messages via custom blocks.", e);
-                        }
-                    }
-                }
-                this._i18n = options.i18n;
-                    // this._i18nWatcher = this._i18n.watchI18nData()
-                    // this._i18n.subscribeDataChanging(this)
-                this._subscribing = true;
-            } else if (isPlainObject(options.i18n)) {
-                // component local i18n
-                if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
-                    options.i18n.root = this.$root.$i18n;
-                    options.i18n.fallbackLocale = this.$root.$i18n.fallbackLocale;
-                    options.i18n.silentTranslationWarn = this.$root.$i18n.silentTranslationWarn;
-                }
-
-                // init locale messages via custom blocks
-                if (options.__i18n) {
-                    try {
-                        var localeMessages$1 = {};
-                        options.__i18n.forEach(function (resource) {
-                            localeMessages$1 = merge(localeMessages$1, JSON.parse(resource));
-                        });
-                        options.i18n.messages = localeMessages$1;
-                    } catch (e) {
-                        {
-                            console.warn("Cannot parse locale messages via custom blocks.", e);
-                        }
-                    }
-                }
-
-                this._i18n = new VueI18n(options.i18n);
-                    // this._i18nWatcher = this._i18n.watchI18nData()
-                    // this._i18n.subscribeDataChanging(this)
-                this._subscribing = true;
-
-                if (options.i18n.sync === undefined || !!options.i18n.sync) {
-                    this._localeWatcher = this.$i18n.watchLocale();
-                }
-            } else {
-                {
-                    console.warn("Cannot be interpreted 'i18n' option.");
-                }
-            }
-        } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
-            console.log(2);
-                // root i18n
-            this._i18n = this.$root.$i18n;
-                // this._i18n.subscribeDataChanging(this)
-            this._subscribing = true;
-        } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
-            console.log(3);
-                // parent i18n
-            this._i18n = options.parent.$i18n;
-                // this._i18n.subscribeDataChanging(this)
-            this._subscribing = true;
-        }
+        if (this._i18n) { return }
+        this._i18n = new VueI18n(options.i18n);
     },
 
     beforeDestroy: function beforeDestroy() {
         if (!this._i18n) { return }
-
-        if (this._subscribing) {
-            // this._i18n.unsubscribeDataChanging(this)
-            delete this._subscribing;
-        }
-
-        if (this._i18nWatcher) {
-            this._i18nWatcher();
-            delete this._i18nWatcher;
-        }
-
-        if (this._localeWatcher) {
-            this._localeWatcher();
-            delete this._localeWatcher;
-        }
-
         this._i18n = null;
-    }
-};
-
-/*  */
-
-var component = {
-    name: 'i18n',
-    functional: true,
-    props: {
-        tag: {
-            type: String,
-            default: 'span'
-        },
-        path: {
-            type: String,
-            required: true
-        },
-        locale: {
-            type: String
-        }
-    },
-    render: function render(h, ref) {
-        var props = ref.props;
-        var data = ref.data;
-        var children = ref.children;
-        var parent = ref.parent;
-
-        var i18n = parent.$i18n;
-        if (!i18n) {
-            {
-                console.warn('Cannot find VueI18n instance!');
-            }
-            return children
-        }
-
-        var path = props.path;
-        var locale = props.locale;
-
-        var params = [];
-        locale && params.push(locale);
-        children.forEach(function (child) { return params.push(child); });
-
-        return h(props.tag, data, i18n.i.apply(i18n, [ path ].concat( params )))
     }
 };
 
@@ -296,11 +161,6 @@ function install(_Vue) {
 
     extend(Vue);
     Vue.mixin(mixin);
-    Vue.component(component.name, component);
-
-    // use object-based merge strategy
-    var strats = Vue.config.optionMergeStrategies;
-    strats.i18n = strats.methods;
 }
 
 /*  */
@@ -523,10 +383,6 @@ VueI18n.prototype._t = function _t (key, _locale, messages, host) {
     );
     return ret
 };
-
-// t(key: Path, ...values: any): TranslateResult {
-// return this._t(key, this.locale, this._getMessages(), null, ...values)
-// }
 
 VueI18n.prototype._tc = function _tc (
     key,

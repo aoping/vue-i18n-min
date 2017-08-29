@@ -12,6 +12,7 @@
         <p>{{$t('null')}}</p>
         <p>{{$tc('night',2)}}</p>
         <p>{{$t('totalOf',{num:3})}}</p>
+        <p>{{$t('totalOf',{num:4})}}</p>
         <p>{{nights}}</p>
     </div>
     <script>
@@ -32,7 +33,7 @@
             locale: 'en',
             messages
         })
-        new Vue({
+        let v = new Vue({
             i18n,
             data: {
                 url: ''

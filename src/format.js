@@ -4,7 +4,8 @@ import { isObject } from './util'
 
 export default class BaseFormatter {
     _caches: {
-        [key: string]: Array < Token > }
+        [key: string]: Array < Token >
+    }
 
     constructor() {
         this._caches = Object.create(null)
@@ -12,6 +13,7 @@ export default class BaseFormatter {
 
     interpolate(message: string, values: any): Array < any > {
         let tokens: Array < Token > = this._caches[message]
+        console.log(tokens)
         if (!tokens) {
             tokens = parse(message)
             this._caches[message] = tokens
@@ -54,11 +56,6 @@ export function parse(format: string): Array < Token > {
                 'named' :
                 'unknown'
             tokens.push({ value: sub, type })
-        } else if (char === '%') {
-            // when found rails i18n syntax, skip text capture
-            if (format[(position)] !== '{') {
-                text += char
-            }
         } else {
             text += char
         }
@@ -74,10 +71,8 @@ export function compile(tokens: Array < Token > , values: Object | Array < any >
     let index: number = 0
 
     const mode: string = Array.isArray(values) ?
-        'list' :
-        isObject(values) ?
-        'named' :
-        'unknown'
+        'list' : isObject(values) ?
+        'named' : 'unknown'
     if (mode === 'unknown') { return compiled }
 
     while (index < tokens.length) {

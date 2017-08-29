@@ -6,7 +6,6 @@ import { isPlainObject, merge } from './util'
 export default {
     beforeCreate(): void {
         const options: any = this.$options
-        options.i18n = options.i18n
         if (options.i18n) {
             if (options.i18n instanceof VueI18n) {
                 this._i18n = options.i18n

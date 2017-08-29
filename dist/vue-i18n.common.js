@@ -78,7 +78,6 @@ function merge(target) {
 var mixin = {
     beforeCreate: function beforeCreate() {
         var options = this.$options;
-        options.i18n = options.i18n;
         if (options.i18n) {
             if (options.i18n instanceof VueI18n) {
                 this._i18n = options.i18n;
@@ -119,6 +118,7 @@ var BaseFormatter = function BaseFormatter() {
 
 BaseFormatter.prototype.interpolate = function interpolate (message, values) {
     var tokens = this._caches[message];
+    console.log(tokens);
     if (!tokens) {
         tokens = parse(message);
         this._caches[message] = tokens;
@@ -155,11 +155,6 @@ function parse(format) {
                 'named' :
                 'unknown';
             tokens.push({ value: sub, type: type });
-        } else if (char === '%') {
-            // when found rails i18n syntax, skip text capture
-            if (format[(position)] !== '{') {
-                text += char;
-            }
         } else {
             text += char;
         }
@@ -175,10 +170,8 @@ function compile(tokens , values ) {
     var index = 0;
 
     var mode = Array.isArray(values) ?
-        'list' :
-        isObject(values) ?
-        'named' :
-        'unknown';
+        'list' : isObject(values) ?
+        'named' : 'unknown';
     if (mode === 'unknown') { return compiled }
 
     while (index < tokens.length) {

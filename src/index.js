@@ -5,7 +5,6 @@ import {
     isNull,
     parseArgs,
     fetchChoice,
-    looseClone,
     remove
 } from './util'
 import BaseFormatter from './format'
@@ -16,17 +15,13 @@ export default class VueI18n {
 
     _vm: any
     _formatter: Formatter
-    _root: ? I18n
 
     constructor(options: I18nOptions = {}) {
         const locale: Locale = options.locale || 'en-US'
         const messages: LocaleMessages = options.messages || {}
 
         this._vm = null
-        this._formatter = options.formatter || new BaseFormatter()
-        this._root = options.root || null
-        this._sync = options.sync === undefined ? true : !!options.sync
-
+        this._formatter = new BaseFormatter()
 
         this._initVM({
             locale,
@@ -38,26 +33,15 @@ export default class VueI18n {
         locale: Locale,
         messages: LocaleMessages
     }): void {
-        const silent = Vue.config.silent
-        Vue.config.silent = true
         this._vm = new Vue({ data })
-        Vue.config.silent = silent
     }
 
     get vm(): any { return this._vm }
-
-    get messages(): LocaleMessages { return looseClone(this._getMessages()) }
 
     get locale(): Locale { return this._vm.locale }
     set locale(locale: Locale): void {
         this._vm.$set(this._vm, 'locale', locale)
     }
-
-
-    get formatter(): Formatter { return this._formatter }
-    set formatter(formatter: Formatter): void { this._formatter = formatter }
-
-
 
     _getMessages(): LocaleMessages { return this._vm.messages }
 
@@ -91,8 +75,6 @@ export default class VueI18n {
 
     _render(message: string, interpolateMode: string, values: any): any {
         const ret = this._formatter.interpolate(message, values)
-            // if interpolateMode is **not** 'string' ('row'),
-            // return the compiled data (e.g. ['foo', VNode, 'bar']) with formatter
         return interpolateMode === 'string' ? ret.join('') : ret
     }
 

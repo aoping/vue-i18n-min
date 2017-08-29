@@ -66,11 +66,7 @@ export function fetchChoice(message: string, choice: number): ? string {
     return choices[choice].trim()
 }
 
-export function looseClone(obj: Object) : Object {
-    return JSON.parse(JSON.stringify(obj))
-}
-
-export function remove(arr: Array < any > , item: any): Array < any > | void {
+export function remove(arr: Array < any > , item: any) : Array < any > | void {
     if (arr.length) {
         const index = arr.indexOf(item)
         if (index > -1) {

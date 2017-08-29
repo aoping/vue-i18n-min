@@ -96,10 +96,6 @@ function fetchChoice(message, choice) {
     return choices[choice].trim()
 }
 
-function looseClone(obj)  {
-    return JSON.parse(JSON.stringify(obj))
-}
-
 
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -282,10 +278,7 @@ var VueI18n = function VueI18n(options) {
     var messages = options.messages || {};
 
     this._vm = null;
-    this._formatter = options.formatter || new BaseFormatter();
-    this._root = options.root || null;
-    this._sync = options.sync === undefined ? true : !!options.sync;
-
+    this._formatter = new BaseFormatter();
 
     this._initVM({
         locale: locale,
@@ -293,29 +286,18 @@ var VueI18n = function VueI18n(options) {
     });
 };
 
-var prototypeAccessors = { vm: {},messages: {},locale: {},formatter: {} };
+var prototypeAccessors = { vm: {},locale: {} };
 
 VueI18n.prototype._initVM = function _initVM (data) {
-    var silent = Vue.config.silent;
-    Vue.config.silent = true;
     this._vm = new Vue({ data: data });
-    Vue.config.silent = silent;
 };
 
 prototypeAccessors.vm.get = function () { return this._vm };
-
-prototypeAccessors.messages.get = function () { return looseClone(this._getMessages()) };
 
 prototypeAccessors.locale.get = function () { return this._vm.locale };
 prototypeAccessors.locale.set = function (locale) {
     this._vm.$set(this._vm, 'locale', locale);
 };
-
-
-prototypeAccessors.formatter.get = function () { return this._formatter };
-prototypeAccessors.formatter.set = function (formatter) { this._formatter = formatter; };
-
-
 
 VueI18n.prototype._getMessages = function _getMessages () { return this._vm.messages };
 
@@ -349,8 +331,6 @@ VueI18n.prototype._interpolate = function _interpolate (
 
 VueI18n.prototype._render = function _render (message, interpolateMode, values) {
     var ret = this._formatter.interpolate(message, values);
-        // if interpolateMode is **not** 'string' ('row'),
-        // return the compiled data (e.g. ['foo', VNode, 'bar']) with formatter
     return interpolateMode === 'string' ? ret.join('') : ret
 };
 

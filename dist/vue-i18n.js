@@ -1,6 +1,6 @@
 /*!
- * vue-i18n v7.1.1 
- * (c) 2017 kazuya kawaguchi
+ * vue-i18n v1.0.0 
+ * (c) 2017 undefined
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -42,7 +42,8 @@ function fetchChoice(message, choice) {
     /* istanbul ignore if */
     if (!message && typeof message !== 'string') { return null }
     var choices = message.split('|');
-
+    if (choice === 1) { choice = 0; }
+    else { choice = 1; }
     if (!choices[choice]) { return message }
     return choices[choice].trim()
 }

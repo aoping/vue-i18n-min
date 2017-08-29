@@ -22,7 +22,8 @@ export function fetchChoice(message: string, choice: number): ? string {
     /* istanbul ignore if */
     if (!message && typeof message !== 'string') { return null }
     const choices: Array < string > = message.split('|')
-
+    if (choice === 1) choice = 0
+    else choice = 1
     if (!choices[choice]) { return message }
     return choices[choice].trim()
 }

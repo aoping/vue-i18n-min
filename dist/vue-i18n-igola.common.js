@@ -1,13 +1,9 @@
 /*!
- * vue-i18n v7.1.1 
- * (c) 2017 kazuya kawaguchi
+ * vue-i18n-igola v1.0.0 
+ * (c) 2017 undefined
  * Released under the MIT License.
  */
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global.VueI18n = factory());
-}(this, (function () { 'use strict';
+'use strict';
 
 /*  */
 
@@ -186,7 +182,7 @@ function compile(tokens , values ) {
                 if (mode === 'list') {
                     compiled.push(values[parseInt(token.value, 10)]);
                 } else {
-                    {
+                    if (process.env.NODE_ENV !== 'production') {
                         console.warn(("Type of token '" + (token.type) + "' and format of value '" + mode + "' don't match!"));
                     }
                 }
@@ -195,13 +191,13 @@ function compile(tokens , values ) {
                 if (mode === 'named') {
                     compiled.push((values)[token.value]);
                 } else {
-                    {
+                    if (process.env.NODE_ENV !== 'production') {
                         console.warn(("Type of token '" + (token.type) + "' and format of value '" + mode + "' don't match!"));
                     }
                 }
                 break
             case 'unknown':
-                {
+                if (process.env.NODE_ENV !== 'production') {
                     warn("Detect 'unknown' type of token!");
                 }
                 break
@@ -303,6 +299,4 @@ if (typeof window !== 'undefined' && window.Vue) {
     window.Vue.use(VueI18n);
 }
 
-return VueI18n;
-
-})));
+module.exports = VueI18n;

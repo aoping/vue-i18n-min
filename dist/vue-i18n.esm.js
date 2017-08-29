@@ -10,7 +10,6 @@ function extend(Vue) {
         var i18n = this.$i18n;
         return i18n._t(key, i18n.locale, i18n._getMessages(), args)
     };
-
     Vue.prototype.$tc = function(key, choice  , args) {
         var i18n = this.$i18n;
         return i18n._tc(key, i18n.locale, i18n._getMessages(), choice, args)
@@ -109,7 +108,6 @@ function install(_Vue) {
 }
 
 /*  */
-
 var BaseFormatter = function BaseFormatter() {
     this._caches = Object.create(null);
 };
@@ -226,17 +224,12 @@ var VueI18n = function VueI18n(options) {
 };
 
 var prototypeAccessors = { vm: {},locale: {} };
-
 VueI18n.prototype._initVM = function _initVM (data) {
     this._vm = new Vue({ data: data });
 };
-
 prototypeAccessors.vm.get = function () { return this._vm };
-
 prototypeAccessors.locale.get = function () { return this._vm.locale };
-
 VueI18n.prototype._getMessages = function _getMessages () { return this._vm.messages };
-
 VueI18n.prototype._interpolate = function _interpolate (
     message,
     key,
@@ -255,12 +248,10 @@ VueI18n.prototype._interpolate = function _interpolate (
 
     return !values ? ret : this._render(ret, interpolateMode, values)
 };
-
 VueI18n.prototype._render = function _render (message, interpolateMode, values) {
     var ret = this._formatter.interpolate(message, values);
     return interpolateMode === 'string' ? ret.join('') : ret
 };
-
 VueI18n.prototype._translate = function _translate (
     messages,
     locale,
@@ -277,7 +268,6 @@ VueI18n.prototype._translate = function _translate (
         return null
     }
 };
-
 VueI18n.prototype._t = function _t (key, _locale, messages, args) {
     if (!key) { return '' }
     var ret = this._translate(
@@ -286,7 +276,6 @@ VueI18n.prototype._t = function _t (key, _locale, messages, args) {
     );
     return ret
 };
-
 VueI18n.prototype._tc = function _tc (
     key,
     _locale,
@@ -304,8 +293,6 @@ VueI18n.prototype._tc = function _tc (
 Object.defineProperties( VueI18n.prototype, prototypeAccessors );
 
 VueI18n.install = install;
-
-/* istanbul ignore if */
 if (typeof window !== 'undefined' && window.Vue) {
     window.Vue.use(VueI18n);
 }

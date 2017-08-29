@@ -1,7 +1,5 @@
 /* @flow */
-
 import { isObject } from './util'
-
 export default class BaseFormatter {
     _caches: {
         [key: string]: Array < Token >

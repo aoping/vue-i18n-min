@@ -57,7 +57,7 @@ function genConfig(opts) {
             flow(),
             buble()
         ],
-        sourceMap: true
+        // sourceMap: true
     }
 
     const replacePluginOptions = { '__VERSION__': pack.version }

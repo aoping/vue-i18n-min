@@ -14,18 +14,21 @@
         <p>{{$t('totalOf',{num:3})}}</p>
         <p>{{$t('totalOf',{num:4})}}</p>
         <p>{{nights}}</p>
+        <p>{{ $t('hello', ['hello','xxx']) }}</p>
     </div>
     <script>
         const messages = {
             en: {
                 null: 'Sorry,null hotels according with your requirement.',
-                totalOf: 'total of {num}',
-                night: 'night | nights'
+                totalOf: 'total of {num} aa',
+                night: 'night | nights',
+                hello: '{0} world, {1}'
             },
             zh: {
                 null: '抱歉，没有找到符合您要求的酒店，请重新选择筛选条件',
-                totalOf: '共{num}张',
-                night: '晚'
+                totalOf: '共{num}张aa',
+                night: '晚',
+                hello: '{0} 世界, {1}'
             }
         }
 

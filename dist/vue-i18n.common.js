@@ -13,7 +13,6 @@ function extend(Vue) {
         while ( len-- > 0 ) values[ len ] = arguments[ len + 1 ];
 
         var i18n = this.$i18n;
-        console.log(this);
         return i18n._t.apply(i18n, [ key, i18n.locale, i18n._getMessages(), this ].concat( values ))
     };
 
@@ -130,8 +129,13 @@ function merge(target) {
 
 var mixin = {
     beforeCreate: function beforeCreate() {
-        if (this._i18n) { return }
-        this._i18n = new VueI18n(options.i18n);
+        var options = this.$options;
+        options.i18n = options.i18n;
+        if (options.i18n) {
+            if (options.i18n instanceof VueI18n) {
+                this._i18n = options.i18n;
+            }
+        }
     },
 
     beforeDestroy: function beforeDestroy() {

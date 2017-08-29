@@ -3,7 +3,6 @@
 import { install, Vue } from './install'
 import {
     isNull,
-    parseArgs,
     fetchChoice,
     remove
 } from './util'
@@ -39,14 +38,10 @@ export default class VueI18n {
     get vm(): any { return this._vm }
 
     get locale(): Locale { return this._vm.locale }
-    set locale(locale: Locale): void {
-        this._vm.$set(this._vm, 'locale', locale)
-    }
 
     _getMessages(): LocaleMessages { return this._vm.messages }
 
     _interpolate(
-        locale: Locale,
         message: LocaleMessageObject,
         key: Path,
         interpolateMode: string,
@@ -78,7 +73,7 @@ export default class VueI18n {
         args: any
     ): any {
         let res: any =
-            this._interpolate(locale, messages[locale], key, interpolateMode, args)
+            this._interpolate(messages[locale], key, interpolateMode, args)
 
         if (!isNull(res)) {
             return res
@@ -87,15 +82,11 @@ export default class VueI18n {
         }
     }
 
-    _t(key: Path, _locale: Locale, messages: LocaleMessages, ...values: any): any {
+    _t(key: Path, _locale: Locale, messages: LocaleMessages, args: any): any {
         if (!key) { return '' }
-
-        const parsedArgs = parseArgs(...values)
-        const locale: Locale = parsedArgs.locale || _locale
-
         const ret: any = this._translate(
-            messages, locale, key,
-            'string', parsedArgs.params
+            messages, _locale, key,
+            'string', args
         )
         return ret
     }
@@ -105,13 +96,13 @@ export default class VueI18n {
         _locale: Locale,
         messages: LocaleMessages,
         choice ? : number,
-        ...values: any
+        args: any
     ): any {
         if (!key) { return '' }
         if (choice === undefined) {
             choice = 1
         }
-        return fetchChoice(this._t(key, _locale, messages, ...values), choice)
+        return fetchChoice(this._t(key, _locale, messages, args), choice)
     }
 
 }

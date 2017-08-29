@@ -64,28 +64,11 @@ function parseArgs() {
     return { locale: locale, params: params }
 }
 
-function getOldChoiceIndexFixed(choice) {
-    return choice ?
-        choice > 1 ?
-        1 :
-        0 :
-        1
-}
-
-function getChoiceIndex(choice, choicesLength) {
-    choice = Math.abs(choice);
-
-    if (choicesLength === 2) { return getOldChoiceIndexFixed(choice) }
-
-    return choice ? Math.min(choice, 2) : 0
-}
-
 function fetchChoice(message, choice) {
     /* istanbul ignore if */
     if (!message && typeof message !== 'string') { return null }
     var choices = message.split('|');
 
-    choice = getChoiceIndex(choice, choices.length);
     if (!choices[choice]) { return message }
     return choices[choice].trim()
 }
@@ -305,18 +288,11 @@ VueI18n.prototype._interpolate = function _interpolate (
     if (!message) { return null }
 
     var pathRet = message[key];
-    if (Array.isArray(pathRet)) { return pathRet }
-
     var ret;
-    if (isNull(pathRet)) {
-        return null
+    if (typeof pathRet === 'string') {
+        ret = pathRet;
     } else {
-        /* istanbul ignore else */
-        if (typeof pathRet === 'string') {
-            ret = pathRet;
-        } else {
-            return null
-        }
+        return null
     }
 
     return !values ? ret : this._render(ret, interpolateMode, values)

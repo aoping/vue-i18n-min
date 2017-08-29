@@ -55,18 +55,11 @@ export default class VueI18n {
         if (!message) { return null }
 
         const pathRet: string = message[key]
-        if (Array.isArray(pathRet)) { return pathRet }
-
         let ret: mixed
-        if (isNull(pathRet)) {
-            return null
+        if (typeof pathRet === 'string') {
+            ret = pathRet
         } else {
-            /* istanbul ignore else */
-            if (typeof pathRet === 'string') {
-                ret = pathRet
-            } else {
-                return null
-            }
+            return null
         }
 
         return !values ? ret : this._render(ret, interpolateMode, values)

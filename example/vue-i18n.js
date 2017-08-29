@@ -27,19 +27,6 @@ function extend(Vue) {
         var i18n = this.$i18n;
         return i18n._tc.apply(i18n, [ key, i18n.locale, i18n._getMessages(), this, choice ].concat( values ))
     };
-
-    // Vue.prototype.$te = function (key: Path, locale?: Locale): boolean {
-    //   const i18n = this.$i18n
-    //   return i18n._te(key, i18n.locale, i18n._getMessages(), locale)
-    // }
-
-    // Vue.prototype.$d = function (value: number | Date, ...args: any): DateTimeFormatResult {
-    //   return this.$i18n.d(value, ...args)
-    // }
-
-    // Vue.prototype.$n = function (value: number, ...args: any): NumberFormatResult {
-    //   return this.$i18n.n(value, ...args)
-    // }
 }
 
 /*  */
@@ -152,8 +139,9 @@ var mixin = {
     beforeCreate: function beforeCreate() {
         var options = this.$options;
         options.i18n = options.i18n || (options.__i18n ? {} : null);
-
+        console.log(options.i18n);
         if (options.i18n) {
+            console.log(1);
             if (options.i18n instanceof VueI18n) {
                 // init locale messages via custom blocks
                 if (options.__i18n) {
@@ -212,12 +200,14 @@ var mixin = {
                 }
             }
         } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
-            // root i18n
+            console.log(2);
+                // root i18n
             this._i18n = this.$root.$i18n;
                 // this._i18n.subscribeDataChanging(this)
             this._subscribing = true;
         } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
-            // parent i18n
+            console.log(3);
+                // parent i18n
             this._i18n = options.parent.$i18n;
                 // this._i18n.subscribeDataChanging(this)
             this._subscribing = true;
@@ -294,19 +284,11 @@ var Vue;
 function install(_Vue) {
     Vue = _Vue;
 
-    var version = (Vue.version && Number(Vue.version.split('.')[0])) || -1;
-        /* istanbul ignore if */
-    if ("development" !== 'production' && install.installed) {
-        console.warn('already installed.');
+    // already installed
+    if (install.installed) {
         return
     }
     install.installed = true;
-
-    /* istanbul ignore if */
-    if ("development" !== 'production' && version < 2) {
-        console.warn(("vue-i18n (" + (install.version) + ") need to use Vue 2.0 or later (Vue: " + (Vue.version) + ")."));
-        return
-    }
 
     Object.defineProperty(Vue.prototype, '$i18n', {
         get: function get() { return this._i18n }
@@ -533,7 +515,6 @@ VueI18n.prototype._t = function _t (key, _locale, messages, host) {
     if (!key) { return '' }
 
     var parsedArgs = parseArgs.apply(void 0, values);
-    console.log(parsedArgs);
     var locale = parsedArgs.locale || _locale;
 
     var ret = this._translate(
@@ -543,13 +524,9 @@ VueI18n.prototype._t = function _t (key, _locale, messages, host) {
     return ret
 };
 
-VueI18n.prototype.t = function t (key) {
-        var values = [], len = arguments.length - 1;
-        while ( len-- > 0 ) values[ len ] = arguments[ len + 1 ];
-
-    return (ref = this)._t.apply(ref, [ key, this.locale, this._getMessages(), null ].concat( values ))
-        var ref;
-};
+// t(key: Path, ...values: any): TranslateResult {
+// return this._t(key, this.locale, this._getMessages(), null, ...values)
+// }
 
 VueI18n.prototype._tc = function _tc (
     key,
@@ -566,14 +543,6 @@ VueI18n.prototype._tc = function _tc (
         choice = 1;
     }
     return fetchChoice((ref = this)._t.apply(ref, [ key, _locale, messages, host ].concat( values )), choice)
-        var ref;
-};
-
-VueI18n.prototype.tc = function tc (key, choice) {
-        var values = [], len = arguments.length - 2;
-        while ( len-- > 0 ) values[ len ] = arguments[ len + 2 ];
-
-    return (ref = this)._tc.apply(ref, [ key, this.locale, this._getMessages(), null, choice ].concat( values ))
         var ref;
 };
 

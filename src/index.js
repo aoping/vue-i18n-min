@@ -127,10 +127,6 @@ export default class VueI18n {
         return ret
     }
 
-    t(key: Path, ...values: any): TranslateResult {
-        return this._t(key, this.locale, this._getMessages(), null, ...values)
-    }
-
     _tc(
         key: Path,
         _locale: Locale,
@@ -144,10 +140,6 @@ export default class VueI18n {
             choice = 1
         }
         return fetchChoice(this._t(key, _locale, messages, host, ...values), choice)
-    }
-
-    tc(key: Path, choice ? : number, ...values: any): TranslateResult {
-        return this._tc(key, this.locale, this._getMessages(), null, choice, ...values)
     }
 
 }

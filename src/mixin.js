@@ -7,8 +7,9 @@ export default {
     beforeCreate(): void {
         const options: any = this.$options
         options.i18n = options.i18n || (options.__i18n ? {} : null)
-
+        console.log(options.i18n)
         if (options.i18n) {
+            console.log(1)
             if (options.i18n instanceof VueI18n) {
                 // init locale messages via custom blocks
                 if (options.__i18n) {
@@ -67,12 +68,14 @@ export default {
                 }
             }
         } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
-            // root i18n
+            console.log(2)
+                // root i18n
             this._i18n = this.$root.$i18n
                 // this._i18n.subscribeDataChanging(this)
             this._subscribing = true
         } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
-            // parent i18n
+            console.log(3)
+                // parent i18n
             this._i18n = options.parent.$i18n
                 // this._i18n.subscribeDataChanging(this)
             this._subscribing = true

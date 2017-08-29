@@ -13,7 +13,7 @@ function extend(Vue) {
         while ( len-- > 0 ) values[ len ] = arguments[ len + 1 ];
 
         var i18n = this.$i18n;
-        return i18n._t.apply(i18n, [ key, i18n.locale, i18n._getMessages(), this ].concat( values ))
+        return i18n._t.apply(i18n, [ key, i18n.locale, i18n._getMessages() ].concat( values ))
     };
 
     Vue.prototype.$tc = function(key, choice) {
@@ -21,7 +21,7 @@ function extend(Vue) {
         while ( len-- > 0 ) values[ len ] = arguments[ len + 2 ];
 
         var i18n = this.$i18n;
-        return i18n._tc.apply(i18n, [ key, i18n.locale, i18n._getMessages(), this, choice ].concat( values ))
+        return i18n._tc.apply(i18n, [ key, i18n.locale, i18n._getMessages(), choice ].concat( values ))
     };
 }
 
@@ -301,7 +301,6 @@ VueI18n.prototype._interpolate = function _interpolate (
     locale,
     message,
     key,
-    host,
     interpolateMode,
     values
 ) {
@@ -334,12 +333,11 @@ VueI18n.prototype._translate = function _translate (
     messages,
     locale,
     key,
-    host,
     interpolateMode,
     args
 ) {
     var res =
-        this._interpolate(locale, messages[locale], key, host, interpolateMode, args);
+        this._interpolate(locale, messages[locale], key, interpolateMode, args);
 
     if (!isNull(res)) {
         return res
@@ -348,9 +346,9 @@ VueI18n.prototype._translate = function _translate (
     }
 };
 
-VueI18n.prototype._t = function _t (key, _locale, messages, host) {
-        var values = [], len = arguments.length - 4;
-        while ( len-- > 0 ) values[ len ] = arguments[ len + 4 ];
+VueI18n.prototype._t = function _t (key, _locale, messages) {
+        var values = [], len = arguments.length - 3;
+        while ( len-- > 0 ) values[ len ] = arguments[ len + 3 ];
 
     if (!key) { return '' }
 
@@ -359,7 +357,7 @@ VueI18n.prototype._t = function _t (key, _locale, messages, host) {
 
     var ret = this._translate(
         messages, locale, key,
-        host, 'string', parsedArgs.params
+        'string', parsedArgs.params
     );
     return ret
 };
@@ -368,17 +366,16 @@ VueI18n.prototype._tc = function _tc (
     key,
     _locale,
     messages,
-    host,
     choice
 ) {
-        var values = [], len = arguments.length - 5;
-        while ( len-- > 0 ) values[ len ] = arguments[ len + 5 ];
+        var values = [], len = arguments.length - 4;
+        while ( len-- > 0 ) values[ len ] = arguments[ len + 4 ];
 
     if (!key) { return '' }
     if (choice === undefined) {
         choice = 1;
     }
-    return fetchChoice((ref = this)._t.apply(ref, [ key, _locale, messages, host ].concat( values )), choice)
+    return fetchChoice((ref = this)._t.apply(ref, [ key, _locale, messages ].concat( values )), choice)
         var ref;
 };
 

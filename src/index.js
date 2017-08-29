@@ -49,7 +49,6 @@ export default class VueI18n {
         locale: Locale,
         message: LocaleMessageObject,
         key: Path,
-        host: any,
         interpolateMode: string,
         values: any
     ): any {
@@ -82,12 +81,11 @@ export default class VueI18n {
         messages: LocaleMessages,
         locale: Locale,
         key: Path,
-        host: any,
         interpolateMode: string,
         args: any
     ): any {
         let res: any =
-            this._interpolate(locale, messages[locale], key, host, interpolateMode, args)
+            this._interpolate(locale, messages[locale], key, interpolateMode, args)
 
         if (!isNull(res)) {
             return res
@@ -96,7 +94,7 @@ export default class VueI18n {
         }
     }
 
-    _t(key: Path, _locale: Locale, messages: LocaleMessages, host: any, ...values: any): any {
+    _t(key: Path, _locale: Locale, messages: LocaleMessages, ...values: any): any {
         if (!key) { return '' }
 
         const parsedArgs = parseArgs(...values)
@@ -104,7 +102,7 @@ export default class VueI18n {
 
         const ret: any = this._translate(
             messages, locale, key,
-            host, 'string', parsedArgs.params
+            'string', parsedArgs.params
         )
         return ret
     }
@@ -113,7 +111,6 @@ export default class VueI18n {
         key: Path,
         _locale: Locale,
         messages: LocaleMessages,
-        host: any,
         choice ? : number,
         ...values: any
     ): any {
@@ -121,7 +118,7 @@ export default class VueI18n {
         if (choice === undefined) {
             choice = 1
         }
-        return fetchChoice(this._t(key, _locale, messages, host, ...values), choice)
+        return fetchChoice(this._t(key, _locale, messages, ...values), choice)
     }
 
 }
